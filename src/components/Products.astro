@@ -1,0 +1,86 @@
+---
+import AirPodsIcon from "./AirPodsIcon.astro";
+import { products } from "../data/store";
+---
+
+<section id="productos">
+	<div class="wrap">
+		<p class="eyebrow">Catálogo</p>
+		<h2>Elige tu modelo</h2>
+
+		<div class="grid">
+			{
+				products.map((p) => (
+					<div class="card">
+						<div class="card-image">
+							<AirPodsIcon />
+						</div>
+						<h3>{p.name}</h3>
+						<p class="tagline">{p.tagline}</p>
+						<p class="price">${p.price.toFixed(2)} USD</p>
+						<button
+							type="button"
+							class="btn btn-primary add-to-cart"
+							data-id={p.id}
+							data-name={p.name}
+							data-price={p.price}
+						>
+							Agregar al carrito
+						</button>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>
+
+<style>
+	h2 {
+		font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+		margin-bottom: 48px;
+	}
+
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 20px;
+	}
+
+	.card {
+		background: var(--bg-elevated);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 28px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.card-image {
+		width: 120px;
+		margin: 0 auto 20px;
+	}
+
+	.card h3 {
+		font-size: 1.15rem;
+		margin-bottom: 8px;
+	}
+
+	.tagline {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		margin-bottom: 18px;
+		flex: 1;
+	}
+
+	.price {
+		font-size: 1.3rem;
+		font-weight: 700;
+		margin-bottom: 18px;
+	}
+
+	@media (max-width: 800px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

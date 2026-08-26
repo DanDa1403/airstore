@@ -1,0 +1,110 @@
+---
+---
+
+<header class="header">
+	<div class="wrap header-inner">
+		<a href="#top" class="logo">AirStore</a>
+		<nav class="nav">
+			<a href="#productos">Productos</a>
+		</nav>
+		<button type="button" id="cart-toggle" class="cart-btn" aria-label="Abrir carrito">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M6 6h15l-1.5 9h-12L6 6zm0 0L5 3H2"
+					stroke="currentColor"
+					stroke-width="1.8"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+				<circle cx="9" cy="20" r="1.4" fill="currentColor" />
+				<circle cx="18" cy="20" r="1.4" fill="currentColor" />
+			</svg>
+			<span id="cart-count" class="cart-count" hidden>0</span>
+		</button>
+	</div>
+</header>
+
+<style>
+	.header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: rgba(255, 255, 255, 0.8);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid var(--border);
+	}
+
+	.header-inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: 16px;
+		padding-bottom: 16px;
+	}
+
+	.logo {
+		font-size: 1.1rem;
+		font-weight: 700;
+		text-decoration: none;
+		color: var(--text);
+		letter-spacing: -0.01em;
+	}
+
+	.nav {
+		display: flex;
+		gap: 24px;
+	}
+
+	.nav a {
+		text-decoration: none;
+		font-size: 0.92rem;
+		color: var(--text-muted);
+		transition: color 0.15s ease;
+	}
+
+	.nav a:hover {
+		color: var(--text);
+	}
+
+	.cart-btn {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 38px;
+		height: 38px;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: var(--bg-elevated);
+		color: var(--text);
+		cursor: pointer;
+		transition: background 0.15s ease;
+	}
+
+	.cart-btn:hover {
+		background: var(--bg-elevated-2);
+	}
+
+	.cart-count {
+		position: absolute;
+		top: -6px;
+		right: -6px;
+		min-width: 18px;
+		height: 18px;
+		padding: 0 4px;
+		border-radius: 999px;
+		background: var(--accent);
+		color: #fff;
+		font-size: 0.7rem;
+		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	@media (max-width: 640px) {
+		.nav {
+			display: none;
+		}
+	}
+</style>
