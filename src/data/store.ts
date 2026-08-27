@@ -15,20 +15,20 @@ export const products: Product[] = [
 		name: "AirPods Pro 2",
 		price: 20,
 		tagline: "Cancelación de ruido activa y estuche con carga inalámbrica.",
-		// image: "/products/pro2.jpg",
+		image: "/products/pro2.png"
 	},
 	{
 		id: "pro3",
 		name: "AirPods Pro 3",
 		price: 25,
 		tagline: "Audio espacial personalizado y mejor autonomía de batería.",
-		// image: "/products/pro3.jpg",
+		image: "/products/pro3.png",
 	},
 	{
 		id: "pro4",
 		name: "AirPods Pro 4",
 		price: 30,
 		tagline: "El modelo más reciente: mayor cancelación de ruido y ajuste mejorado.",
-		// image: "/products/pro4.jpg",
+		image: "/products/pro4.png",
 	},
 ];
