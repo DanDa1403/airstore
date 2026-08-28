@@ -1,6 +1,8 @@
 ---
 import AirPodsIcon from "./AirPodsIcon.astro";
-import { products } from "../data/store";
+import { listProducts } from "../lib/db";
+
+const products = await listProducts();
 ---
 
 <section id="productos">
@@ -10,25 +12,30 @@ import { products } from "../data/store";
 
 		<div class="grid">
 			{
-				products.map((p) => (
-					<div class="card">
-						<div class="card-image">
-							{p.image ? <img src={p.image} alt={p.name} /> : <AirPodsIcon />}
+				products.map((p) => {
+					const outOfStock = p.stock <= 0;
+					return (
+						<div class="card">
+							<div class="card-image">
+								{p.image ? <img src={p.image} alt={p.name} /> : <AirPodsIcon />}
+							</div>
+							<h3>{p.name}</h3>
+							<p class="tagline">{p.tagline}</p>
+							<p class="price">${p.price.toFixed(2)} USD</p>
+							{outOfStock && <p class="stock-badge">Agotado</p>}
+							<button
+								type="button"
+								class="btn btn-primary add-to-cart"
+								data-id={p.id}
+								data-name={p.name}
+								data-price={p.price}
+								disabled={outOfStock}
+							>
+								{outOfStock ? "Agotado" : "Agregar al carrito"}
+							</button>
 						</div>
-						<h3>{p.name}</h3>
-						<p class="tagline">{p.tagline}</p>
-						<p class="price">${p.price.toFixed(2)} USD</p>
-						<button
-							type="button"
-							class="btn btn-primary add-to-cart"
-							data-id={p.id}
-							data-name={p.name}
-							data-price={p.price}
-						>
-							Agregar al carrito
-						</button>
-					</div>
-				))
+					);
+				})
 			}
 		</div>
 	</div>
@@ -86,6 +93,18 @@ import { products } from "../data/store";
 		font-size: 1.3rem;
 		font-weight: 700;
 		margin-bottom: 18px;
+	}
+
+	.stock-badge {
+		display: inline-block;
+		align-self: flex-start;
+		background: #fef1f0;
+		color: #d92d20;
+		font-size: 0.78rem;
+		font-weight: 600;
+		padding: 3px 10px;
+		border-radius: 999px;
+		margin: -10px 0 12px;
 	}
 
 	@media (max-width: 800px) {

@@ -1,4 +1,20 @@
-# Astro Starter Kit: Minimal
+# AirStore
+
+Tienda de AirPods Pro con carrito, checkout por WhatsApp, control de inventario y panel de admin.
+
+## Inventario / Admin
+
+Se despliega en Netlify (funciones serverless vía `@astrojs/netlify`) con base de datos en **Turso** (SQLite hosteado, vía `@libsql/client`).
+
+- Panel de admin (protegido con login): **`/panel-air29k`** — no está enlazado desde ningún lado del sitio público y sus páginas llevan `noindex`. El vendedor debe guardarlo en favoritos; el acceso real lo protege la contraseña, no que la ruta sea "secreta".
+- Variables de entorno obligatorias, configúralas en **Netlify → Site settings → Environment variables** (nunca las subas al repo):
+  - `ADMIN_PASSWORD` — contraseña del panel.
+  - `TURSO_DATABASE_URL` — URL de tu base de datos Turso (`libsql://tu-db-xxxx.turso.io`).
+  - `TURSO_AUTH_TOKEN` — token de autenticación de esa base de datos.
+- En desarrollo local, `.env` ya usa `TURSO_DATABASE_URL=file:./data/airstore.db` (un archivo SQLite local, sin necesitar cuenta de Turso). En producción, reemplázalo por las credenciales reales de Turso.
+- Las tablas (`products`, `orders`, `sessions`) se crean solas la primera vez que corre una función; los productos se siembran solo si la tabla está vacía.
+
+## Astro Starter Kit: Minimal
 
 ```sh
 npm create astro@latest -- --template minimal

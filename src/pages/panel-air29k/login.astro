@@ -1,0 +1,81 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const error = Astro.url.searchParams.has("error");
+---
+
+<Layout title="Admin — AirStore" noindex>
+	<section class="login-wrap">
+		<div class="login-card">
+			<h1>Acceso admin</h1>
+			<p class="subtitle">Ingresa la contraseña para gestionar stock y pedidos.</p>
+
+			{error && <p class="error">Contraseña incorrecta.</p>}
+
+			<form method="POST" action="/api/admin/login">
+				<label for="password">Contraseña</label>
+				<input type="password" id="password" name="password" required autofocus />
+				<button type="submit" class="btn btn-primary">Entrar</button>
+			</form>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.login-wrap {
+		min-height: 70vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 24px;
+	}
+
+	.login-card {
+		background: var(--bg-elevated);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 32px;
+		width: 100%;
+		max-width: 360px;
+	}
+
+	h1 {
+		font-size: 1.4rem;
+		margin-bottom: 8px;
+	}
+
+	.subtitle {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		margin-bottom: 24px;
+	}
+
+	.error {
+		color: #d92d20;
+		font-size: 0.85rem;
+		margin-bottom: 16px;
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	label {
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	input {
+		padding: 11px 14px;
+		border-radius: 10px;
+		border: 1px solid var(--border);
+		font-size: 0.95rem;
+		font-family: inherit;
+	}
+
+	button {
+		margin-top: 8px;
+	}
+</style>

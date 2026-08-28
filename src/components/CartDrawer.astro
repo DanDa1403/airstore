@@ -1,5 +1,8 @@
 ---
-import { products, WHATSAPP_NUMBER } from "../data/store";
+import { WHATSAPP_NUMBER } from "../data/store";
+import { listProducts } from "../lib/db";
+
+const products = await listProducts();
 ---
 
 <div id="cart-overlay" class="cart-overlay" hidden></div>
@@ -139,29 +142,58 @@ import { products, WHATSAPP_NUMBER } from "../data/store";
 		document.body.style.overflow = "";
 	}
 
-	function checkout() {
+	async function checkout(button) {
 		const cart = readCart();
 		const entries = Object.entries(cart).filter(([, qty]) => qty > 0);
 		if (entries.length === 0) return;
 
-		let total = 0;
-		const lines = entries.map(([id, qty]) => {
-			const product = findProduct(id);
-			const subtotal = product.price * qty;
-			total += subtotal;
-			return `- ${product.name} x${qty} — $${subtotal.toFixed(2)}`;
-		});
+		button.disabled = true;
 
-		const message = [
-			"Hola, quiero hacer este pedido en AirStore:",
-			"",
-			...lines,
-			"",
-			`Total: $${total.toFixed(2)} USD`,
-		].join("\n");
+		try {
+			const response = await fetch("/api/orders", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					items: entries.map(([productId, quantity]) => ({ productId, quantity })),
+				}),
+			});
 
-		const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-		window.open(url, "_blank", "noopener");
+			if (!response.ok) {
+				const data = await response.json().catch(() => ({}));
+				if (data.error === "AGOTADO") {
+					alert(`"${data.product}" se agotó justo ahora. Quítalo del carrito para continuar.`);
+				} else {
+					alert(data.error || "No se pudo registrar el pedido. Intenta de nuevo.");
+				}
+				return;
+			}
+
+			let total = 0;
+			const lines = entries.map(([id, qty]) => {
+				const product = findProduct(id);
+				const subtotal = product.price * qty;
+				total += subtotal;
+				return `- ${product.name} x${qty} — $${subtotal.toFixed(2)}`;
+			});
+
+			const message = [
+				"Hola, quiero hacer este pedido en AirStore:",
+				"",
+				...lines,
+				"",
+				`Total: $${total.toFixed(2)} USD`,
+			].join("\n");
+
+			const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+			window.open(url, "_blank", "noopener");
+
+			writeCart({});
+			render();
+		} catch {
+			alert("No se pudo conectar con el servidor. Intenta de nuevo.");
+		} finally {
+			button.disabled = false;
+		}
 	}
 
 	document.addEventListener("click", (e) => {
@@ -198,8 +230,9 @@ import { products, WHATSAPP_NUMBER } from "../data/store";
 			return;
 		}
 
-		if (target.closest("#cart-checkout")) {
-			checkout();
+		const checkoutBtn = target.closest("#cart-checkout");
+		if (checkoutBtn) {
+			checkout(checkoutBtn);
 			return;
 		}
 

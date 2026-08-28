@@ -1,0 +1,293 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { listProducts, listOrders } from "../../lib/db";
+
+export const prerender = false;
+
+const products = await listProducts();
+const orders = await listOrders();
+const pendingOrders = orders.filter((o) => o.status === "pendiente");
+const confirmedOrders = orders.filter((o) => o.status === "confirmado").slice(0, 20);
+
+const error = Astro.url.searchParams.get("error");
+---
+
+<Layout title="Admin — AirStore" noindex>
+	<section class="admin-wrap">
+		<div class="admin-header">
+			<h1>Panel de Admin</h1>
+			<form method="POST" action="/api/admin/logout">
+				<button type="submit" class="btn btn-ghost">Cerrar sesión</button>
+			</form>
+		</div>
+
+		{error && <p class="error">⚠ {error}</p>}
+
+		<div class="panel">
+			<h2>Productos</h2>
+			<div class="product-cards">
+				{
+					products.map((p) => (
+						<div class="product-card">
+							<div class="product-card-top">
+								<span class={`badge ${p.stock <= 0 ? "badge-danger" : "badge-ok"}`}>
+									{p.stock <= 0 ? "Agotado" : `${p.stock} unidades`}
+								</span>
+							</div>
+
+							<form method="POST" action={`/api/admin/products/${p.id}/details`} class="details-form">
+								<label>
+									Nombre
+									<input type="text" name="name" value={p.name} required />
+								</label>
+								<label>
+									Precio (USD)
+									<input type="number" name="price" min="0" step="0.01" value={p.price} required />
+								</label>
+								<label>
+									Descripción
+									<textarea name="tagline" rows="2" required>{p.tagline}</textarea>
+								</label>
+								<button type="submit" class="btn btn-primary btn-sm">Guardar cambios</button>
+							</form>
+
+							<form method="POST" action={`/api/admin/products/${p.id}/stock`} class="stock-form">
+								<label>
+									Stock
+									<input type="number" name="stock" min="0" step="1" value={p.stock} required />
+								</label>
+								<button type="submit" class="btn btn-ghost btn-sm">Guardar stock</button>
+							</form>
+						</div>
+					))
+				}
+			</div>
+		</div>
+
+		<div class="panel">
+			<h2>Pedidos pendientes ({pendingOrders.length})</h2>
+			{
+				pendingOrders.length === 0 ? (
+					<p class="empty">No hay pedidos pendientes.</p>
+				) : (
+					<table>
+						<thead>
+							<tr>
+								<th>Fecha</th>
+								<th>Producto</th>
+								<th>Cantidad</th>
+								<th>Subtotal</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							{pendingOrders.map((o) => (
+								<tr>
+									<td>{new Date(o.created_at + "Z").toLocaleString("es-EC")}</td>
+									<td>{o.product_name}</td>
+									<td>{o.quantity}</td>
+									<td>${(o.unit_price * o.quantity).toFixed(2)}</td>
+									<td>
+										<form method="POST" action={`/api/admin/orders/${o.id}/confirm`}>
+											<button type="submit" class="btn btn-primary btn-sm">Venta confirmada</button>
+										</form>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				)
+			}
+		</div>
+
+		<div class="panel">
+			<h2>Historial reciente de ventas confirmadas</h2>
+			{
+				confirmedOrders.length === 0 ? (
+					<p class="empty">Todavía no hay ventas confirmadas.</p>
+				) : (
+					<table>
+						<thead>
+							<tr>
+								<th>Fecha confirmación</th>
+								<th>Producto</th>
+								<th>Cantidad</th>
+								<th>Subtotal</th>
+							</tr>
+						</thead>
+						<tbody>
+							{confirmedOrders.map((o) => (
+								<tr>
+									<td>{o.confirmed_at ? new Date(o.confirmed_at + "Z").toLocaleString("es-EC") : "—"}</td>
+									<td>{o.product_name}</td>
+									<td>{o.quantity}</td>
+									<td>${(o.unit_price * o.quantity).toFixed(2)}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				)
+			}
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.admin-wrap {
+		max-width: 1000px;
+		margin: 0 auto;
+		padding: 48px 24px 88px;
+	}
+
+	.admin-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 24px;
+	}
+
+	h1 {
+		font-size: 1.6rem;
+	}
+
+	.error {
+		background: #fef1f0;
+		border: 1px solid #f4c5c0;
+		color: #d92d20;
+		padding: 10px 14px;
+		border-radius: 10px;
+		margin-bottom: 20px;
+		font-size: 0.9rem;
+	}
+
+	.panel {
+		background: var(--bg-elevated);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 24px;
+		margin-bottom: 24px;
+	}
+
+	.panel h2 {
+		font-size: 1.1rem;
+		margin-bottom: 16px;
+	}
+
+	.empty {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.9rem;
+	}
+
+	th {
+		text-align: left;
+		color: var(--text-muted);
+		font-weight: 600;
+		font-size: 0.78rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		padding: 8px 10px;
+		border-bottom: 1px solid var(--border);
+	}
+
+	td {
+		padding: 10px;
+		border-bottom: 1px solid var(--border);
+		vertical-align: middle;
+	}
+
+	tr:last-child td {
+		border-bottom: none;
+	}
+
+	.badge {
+		display: inline-block;
+		padding: 3px 10px;
+		border-radius: 999px;
+		font-size: 0.8rem;
+		font-weight: 600;
+	}
+
+	.badge-ok {
+		background: #e6f4ea;
+		color: #1e7e34;
+	}
+
+	.badge-danger {
+		background: #fef1f0;
+		color: #d92d20;
+	}
+
+	.product-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 16px;
+	}
+
+	.product-card {
+		background: var(--bg);
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		padding: 18px;
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+
+	.product-card-top {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.details-form,
+	.stock-form {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.stock-form {
+		flex-direction: row;
+		align-items: flex-end;
+		gap: 8px;
+		padding-top: 10px;
+		border-top: 1px solid var(--border);
+	}
+
+	.details-form label,
+	.stock-form label {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--text-muted);
+	}
+
+	.stock-form label {
+		flex: 1;
+	}
+
+	.details-form input,
+	.details-form textarea,
+	.stock-form input {
+		padding: 8px 10px;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+		font-family: inherit;
+		font-size: 0.9rem;
+		color: var(--text);
+		resize: vertical;
+	}
+
+	.btn-sm {
+		padding: 8px 16px;
+		font-size: 0.85rem;
+		align-self: flex-start;
+	}
+</style>
