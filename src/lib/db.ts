@@ -79,14 +79,6 @@ function ensureSchema(): Promise<void> {
 /** Semilla inicial: solo se usa si la tabla products está vacía (primer arranque). */
 const SEED_PRODUCTS = [
 	{
-		id: "pro2",
-		name: "AirPods Pro 2",
-		price: 20,
-		tagline: "Cancelación de ruido activa y estuche con carga inalámbrica.",
-		image: "/products/pro2.png",
-		stock: 10,
-	},
-	{
 		id: "pro3",
 		name: "AirPods Pro 3",
 		price: 25,
@@ -95,11 +87,11 @@ const SEED_PRODUCTS = [
 		stock: 10,
 	},
 	{
-		id: "pro4",
-		name: "AirPods Pro 4",
-		price: 30,
-		tagline: "El modelo más reciente: mayor cancelación de ruido y ajuste mejorado.",
-		image: "/products/pro4.png",
+		id: "iphone-battery-pack",
+		name: "Battery Pack de iPhone",
+		price: 20,
+		tagline: "Carga extra portátil para tu iPhone, ideal para el día a día y viajes.",
+		image: null,
 		stock: 10,
 	},
 ];
