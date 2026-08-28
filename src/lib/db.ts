@@ -91,7 +91,7 @@ const SEED_PRODUCTS = [
 		name: "Battery Pack de iPhone",
 		price: 20,
 		tagline: "Carga extra portátil para tu iPhone, ideal para el día a día y viajes.",
-		image: null,
+		image: "/products/baterypack.png",
 		stock: 10,
 	},
 ];
