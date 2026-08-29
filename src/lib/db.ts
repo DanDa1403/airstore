@@ -1,5 +1,5 @@
 import { createClient, type Client } from "@libsql/client";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 
 function env(name: string): string | undefined {
 	return (import.meta.env as Record<string, string | undefined>)[name] ?? process.env[name];
@@ -48,9 +48,17 @@ function ensureSchema(): Promise<void> {
 					unit_price REAL NOT NULL,
 					status TEXT NOT NULL DEFAULT 'pendiente',
 					created_at TEXT NOT NULL DEFAULT (datetime('now')),
-					confirmed_at TEXT
+					confirmed_at TEXT,
+					order_code TEXT NOT NULL DEFAULT ''
 				)
 			`);
+
+			// Migración: bases de datos creadas antes de que existiera order_code no tienen la columna.
+			try {
+				await db.execute("ALTER TABLE orders ADD COLUMN order_code TEXT NOT NULL DEFAULT ''");
+			} catch {
+				// La columna ya existe: no hacer nada.
+			}
 
 			await db.execute(`
 				CREATE TABLE IF NOT EXISTS sessions (
@@ -114,6 +122,19 @@ export interface Order {
 	status: "pendiente" | "confirmado";
 	created_at: string;
 	confirmed_at: string | null;
+	order_code: string;
+}
+
+/** Caracteres sin ambigüedad visual (sin 0/O ni 1/I/L) para que el código sea fácil de leer y comparar en WhatsApp. */
+const ORDER_CODE_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+
+/** Código corto compartido por todos los productos de un mismo checkout, para identificar el pedido en WhatsApp y en el panel. */
+function generateOrderCode(): string {
+	let code = "";
+	for (let i = 0; i < 4; i++) {
+		code += ORDER_CODE_CHARS[randomInt(ORDER_CODE_CHARS.length)];
+	}
+	return code;
 }
 
 export async function listProducts(): Promise<Product[]> {
@@ -192,6 +213,9 @@ export async function createPendingOrders(items: OrderItemInput[]): Promise<Orde
 	await ensureSchema();
 	const db = getClient();
 
+	// Un solo código para todo el checkout: agrupa todos los productos del mismo mensaje de WhatsApp.
+	const orderCode = generateOrderCode();
+
 	const tx = await db.transaction("write");
 	try {
 		const created: Order[] = [];
@@ -212,9 +236,9 @@ export async function createPendingOrders(items: OrderItemInput[]): Promise<Orde
 			}
 
 			const insertResult = await tx.execute({
-				sql: `INSERT INTO orders (product_id, product_name, quantity, unit_price, status)
-				      VALUES (?, ?, ?, ?, 'pendiente')`,
-				args: [product.id, product.name, item.quantity, product.price],
+				sql: `INSERT INTO orders (product_id, product_name, quantity, unit_price, status, order_code)
+				      VALUES (?, ?, ?, ?, 'pendiente', ?)`,
+				args: [product.id, product.name, item.quantity, product.price, orderCode],
 			});
 			const orderResult = await tx.execute({
 				sql: "SELECT * FROM orders WHERE id = ?",

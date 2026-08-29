@@ -168,6 +168,9 @@ const products = await listProducts();
 				return;
 			}
 
+			const data = await response.json();
+			const orderCode = data.orders?.[0]?.order_code;
+
 			let total = 0;
 			const lines = entries.map(([id, qty]) => {
 				const product = findProduct(id);
@@ -178,6 +181,7 @@ const products = await listProducts();
 
 			const message = [
 				"Hola, quiero hacer este pedido en AirStore:",
+				...(orderCode ? [`Código de pedido: ${orderCode}`] : []),
 				"",
 				...lines,
 				"",

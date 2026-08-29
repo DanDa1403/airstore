@@ -73,6 +73,7 @@ const error = Astro.url.searchParams.get("error");
 					<table>
 						<thead>
 							<tr>
+								<th>Código</th>
 								<th>Fecha</th>
 								<th>Producto</th>
 								<th>Cantidad</th>
@@ -83,6 +84,7 @@ const error = Astro.url.searchParams.get("error");
 						<tbody>
 							{pendingOrders.map((o) => (
 								<tr>
+									<td><span class="order-code">{o.order_code || "—"}</span></td>
 									<td>{new Date(o.created_at + "Z").toLocaleString("es-EC")}</td>
 									<td>{o.product_name}</td>
 									<td>{o.quantity}</td>
@@ -109,6 +111,7 @@ const error = Astro.url.searchParams.get("error");
 					<table>
 						<thead>
 							<tr>
+								<th>Código</th>
 								<th>Fecha confirmación</th>
 								<th>Producto</th>
 								<th>Cantidad</th>
@@ -118,6 +121,7 @@ const error = Astro.url.searchParams.get("error");
 						<tbody>
 							{confirmedOrders.map((o) => (
 								<tr>
+									<td><span class="order-code">{o.order_code || "—"}</span></td>
 									<td>{o.confirmed_at ? new Date(o.confirmed_at + "Z").toLocaleString("es-EC") : "—"}</td>
 									<td>{o.product_name}</td>
 									<td>{o.quantity}</td>
@@ -221,6 +225,18 @@ const error = Astro.url.searchParams.get("error");
 	.badge-danger {
 		background: #fef1f0;
 		color: #d92d20;
+	}
+
+	.order-code {
+		display: inline-block;
+		font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+		font-weight: 700;
+		font-size: 0.82rem;
+		letter-spacing: 0.06em;
+		background: var(--bg);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		padding: 3px 8px;
 	}
 
 	.product-cards {
